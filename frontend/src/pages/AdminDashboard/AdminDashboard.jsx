@@ -10,6 +10,7 @@ import {
 
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
+import Swal from "sweetalert2";
 
 function AdminDashboard() {
   const dispatch = useDispatch();
@@ -115,13 +116,26 @@ function AdminDashboard() {
     setErrors({});
   };
 
-  const handleDelete = (id) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this user?"
-    );
+  const handleDelete = async (id) => {
+    const confirmDelete = await Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it!",
+    });
 
     if (confirmDelete) {
       dispatch(deleteUser(id));
+      Swal.fire({
+      icon: "success",
+      title: "Deleted!",
+      text: "User has been deleted.",
+      timer: 1500,
+      showConfirmButton: false
+    });
     }
   };
 
@@ -195,7 +209,6 @@ function AdminDashboard() {
         </tbody>
       </table>
 
-      
       <div className="modal fade" id="createModal">
         <div className="modal-dialog">
           <div className="modal-content">
@@ -241,10 +254,7 @@ function AdminDashboard() {
             </div>
 
             <div className="modal-footer">
-              <button
-                className="btn btn-success"
-                onClick={handleCreate}
-              >
+              <button className="btn btn-success" onClick={handleCreate}>
                 Create
               </button>
             </div>
@@ -252,7 +262,6 @@ function AdminDashboard() {
         </div>
       </div>
 
-      
       <div className="modal fade" id="editModal">
         <div className="modal-dialog">
           <div className="modal-content">
@@ -312,4 +321,3 @@ function AdminDashboard() {
 }
 
 export default AdminDashboard;
-

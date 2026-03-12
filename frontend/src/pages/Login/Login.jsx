@@ -1,27 +1,28 @@
 import React, { useEffect, useState } from "react";
 import "./Login.css";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { useDispatch,useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { loginUser, registerUser } from "../../redux/userSlice";
 import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 
 function Login() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { loading ,error ,token } = useSelector((state) => state.users);
+  const { loading, error, token } = useSelector((state) => state.users);
   const [isLogin, setIsLogin] = useState(true);
 
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    password: ""
+    password: "",
   });
 
-  useEffect(()=>{
-    if(token){
-      navigate('/');
+  useEffect(() => {
+    if (token) {
+      navigate("/");
     }
-  },[token,navigate]);
+  }, [token, navigate]);
 
   const [errors, setErrors] = useState({});
 
@@ -30,7 +31,6 @@ function Login() {
 
     setFormData({ ...formData, [name]: value });
 
-   
     setErrors({ ...errors, [name]: "" });
   }
 
@@ -59,43 +59,46 @@ function Login() {
   }
 
   async function handleSubmit(e) {
-  e.preventDefault();
+    e.preventDefault();
 
-  if (!validate()) return;
+    if (!validate()) return;
 
-  if (isLogin) {
-    try {
-      const data = await dispatch(
-        loginUser({
-          email: formData.email,
-          password: formData.password,
-        })
-      ).unwrap();
+    if (isLogin) {
+      try {
+        const data = await dispatch(
+          loginUser({
+            email: formData.email,
+            password: formData.password,
+          }),
+        ).unwrap();
 
-      if (data.user.isAdmin) {
-        alert("Admin users cannot log in from this page.");
-        localStorage.removeItem("token");
-        return;
+        if (data.user.isAdmin) {
+          Swal.fire({
+            icon: "warning",
+            title: "Access Denied",
+            text: "Admin users cannot log in from this page.",
+          });
+          localStorage.removeItem("token");
+          return;
+        }
+      } catch (err) {
+        Swal.fire({
+          icon: "error",
+          title: "Login Failed",
+          text: err || "Something went wrong",
+        });
       }
-
-    } catch (err) {
-      alert("Login failed: " + err);
+    } else {
+      dispatch(registerUser(formData));
     }
-  } else {
-    dispatch(registerUser(formData));
   }
-}
 
   return (
     <div className="authPage">
       <div className="authCard">
+        <h2 className="authTitle fw-bold">{isLogin ? "LOGIN" : "REGISTER"}</h2>
 
-        <h2 className="authTitle fw-bold">
-          {isLogin ? "LOGIN" : "REGISTER"}
-        </h2>
-          
         <form className="authForm" onSubmit={handleSubmit}>
-
           {!isLogin && (
             <>
               <input
@@ -136,26 +139,23 @@ function Login() {
             <small className="text-danger">{errors.password}</small>
           )}
 
-          <button className="btn btn-primary authButton w-100" disabled={loading}>
+          <button
+            className="btn btn-primary authButton w-100"
+            disabled={loading}
+          >
             {loading ? "Please wait..." : isLogin ? "Login" : "Sign Up"}
           </button>
 
-          {error && <p style={{color:"red"}}>{error}</p>}
+          {error && <p style={{ color: "red" }}>{error}</p>}
         </form>
 
         <p className="authSwitch">
-          {isLogin
-            ? "Don't have an account?"
-            : "Already have an account?"}
+          {isLogin ? "Don't have an account?" : "Already have an account?"}
 
-          <span
-            className="authToggle"
-            onClick={() => setIsLogin(!isLogin)}
-          >
+          <span className="authToggle" onClick={() => setIsLogin(!isLogin)}>
             {isLogin ? " Register" : " Login"}
           </span>
         </p>
-
       </div>
     </div>
   );

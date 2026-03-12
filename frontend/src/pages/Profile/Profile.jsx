@@ -4,6 +4,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { updateProfileImage } from "../../redux/userSlice";
 import "./Profile.css";
 import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -48,16 +49,19 @@ export default function Profile() {
   };
 
   const handleSubmit = async () => {
-
     if (!validate()) return;
 
-    // check if anything changed
+   
     const isNameChanged = name !== user?.name;
     const isEmailChanged = email !== user?.email;
     const isImageChanged = image !== null;
 
     if (!isNameChanged && !isEmailChanged && !isImageChanged) {
-      alert("No changes detected");
+      Swal.fire({
+        icon: "info",
+        title: "No Changes",
+        text: "No Changes Detected",
+      });
       return;
     }
 
@@ -72,12 +76,21 @@ export default function Profile() {
 
       await dispatch(updateProfileImage(formData)).unwrap();
 
-      alert("Profile updated successfully!");
+      Swal.fire({
+        icon: "success",
+        title: "Success",
+        text: "Profile updated successfully!",
+        timer: 2000,
+        showConfirmButton: false,
+      });
 
       navigate("/");
-
     } catch (err) {
-      alert("Failed to update profile: " + err);
+      Swal.fire({
+        icon: "error",
+        title: "Update Failed",
+        text: err || "Something went wrong",
+      });
     } finally {
       setLoading(false);
     }
@@ -88,7 +101,6 @@ export default function Profile() {
       <div className="profileCard">
         <h2 className="profileTitle">User Profile</h2>
 
-        
         <div className="imageWrapper">
           <img
             src={preview || user?.profileImage || "/avatar.png"}
@@ -97,7 +109,6 @@ export default function Profile() {
           />
         </div>
 
-       
         <input
           type="text"
           className="form-control mt-3"
@@ -106,11 +117,8 @@ export default function Profile() {
           placeholder="Enter your name"
         />
 
-        {errors.name && (
-          <small className="text-danger">{errors.name}</small>
-        )}
+        {errors.name && <small className="text-danger">{errors.name}</small>}
 
-       
         <input
           type="email"
           className="form-control mt-3"
@@ -119,18 +127,14 @@ export default function Profile() {
           placeholder="Enter your email"
         />
 
-        {errors.email && (
-          <small className="text-danger">{errors.email}</small>
-        )}
+        {errors.email && <small className="text-danger">{errors.email}</small>}
 
-        
         <input
           type="file"
           className="form-control mt-3"
           onChange={handleUpload}
         />
 
-       
         <button
           className="btn btn-primary w-100 mt-3"
           onClick={handleSubmit}
@@ -148,7 +152,6 @@ export default function Profile() {
             "Update Profile"
           )}
         </button>
-
       </div>
     </div>
   );
