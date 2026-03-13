@@ -63,11 +63,25 @@ exports.createUser = async (req, res) => {
 };
 
 exports.updateUser = async(req,res)=>{
+    const { email } = req.body;
+
+    const existingUser = await User.findOne({
+      email,
+      _id: { $ne: req.params.id }, 
+    });
+
+    if (existingUser) {
+      return res.status(400).json({
+        message: "Email already exists",
+      });
+    }
+
     const user = await User.findByIdAndUpdate(
-        req.params.id,
-        req.body,
-        {returnDocument: "after"}
-    )
+      req.params.id,
+      req.body,
+      { new: true }
+    );
+
     res.json(user);
 }
 exports.deleteUser = async(req,res)=>{

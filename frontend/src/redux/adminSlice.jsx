@@ -80,6 +80,10 @@ export const updateUser = createAsyncThunk(
     });
 
     const data = await res.json();
+
+    if(!res.ok){
+      return thunkAPI.rejectWithValue(data.message);
+    }
     return data;
   },
 );
@@ -101,6 +105,10 @@ export const createUser = createAsyncThunk(
     });
 
     const data = await res.json();
+
+    if (!res.ok) {
+      return thunkAPI.rejectWithValue(data.message);
+    }
 
     return data;
   },

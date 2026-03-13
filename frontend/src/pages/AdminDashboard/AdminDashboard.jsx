@@ -11,6 +11,7 @@ import {
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import Swal from "sweetalert2";
+import { adminLogout } from "../../redux/adminSlice";
 
 function AdminDashboard() {
   const dispatch = useDispatch();
@@ -90,17 +91,26 @@ function AdminDashboard() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleCreate = () => {
+  const handleCreate = async () => {
     if (!validateCreate()) return;
 
-    dispatch(createUser(form));
+    const result = await dispatch(createUser(form));
+    if (createUser.rejected.match(result)) {
+      setErrors({ email: result.payload });
+      return;
+    }
     setForm({ name: "", email: "", password: "" });
   };
 
-  const handleUpdate = () => {
+  const handleUpdate = async () => {
     if (!validateEdit()) return;
 
-    dispatch(updateUser({ id: editId, userData: form }));
+    const result = await dispatch(updateUser({ id: editId, userData: form }));
+
+    if (updateUser.rejected.match(result)) {
+      setErrors({ email: result.payload });
+      return;
+    }
     setEditId(null);
   };
 
@@ -130,19 +140,50 @@ function AdminDashboard() {
     if (confirmDelete) {
       dispatch(deleteUser(id));
       Swal.fire({
-      icon: "success",
-      title: "Deleted!",
-      text: "User has been deleted.",
-      timer: 1500,
-      showConfirmButton: false
-    });
+        icon: "success",
+        title: "Deleted!",
+        text: "User has been deleted.",
+        timer: 1500,
+        showConfirmButton: false,
+      });
     }
   };
+  const handleOpenCreate = () => {
+    setForm({
+      name: "",
+      email: "",
+      password: "",
+    });
 
+    setErrors({});
+    setEditId(null);
+  };
+  const handleLogout = async () => {
+    const confirmLogout = await Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it!",
+    });
+    if (confirmLogout) {
+      dispatch(adminLogout());
+      Swal.fire({
+        icon: "success",
+        title: "Successfully logout!",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+    }
+  };
   return (
     <div className="container mt-5">
       <h2 className="mb-4">Admin Dashboard</h2>
-
+      <button className="btn btn-sm btn-danger my-3" onClick={handleLogout}>
+        Logout
+      </button>
       <input
         className="form-control mb-3"
         placeholder="Search users..."
@@ -154,10 +195,11 @@ function AdminDashboard() {
         className="btn btn-primary mb-3"
         data-bs-toggle="modal"
         data-bs-target="#createModal"
+        onClick={handleOpenCreate}
       >
         Create User
       </button>
-
+      <h3>Number of users:{users.length}</h3>
       <table className="table table-bordered">
         <thead>
           <tr>
@@ -305,11 +347,7 @@ function AdminDashboard() {
             </div>
 
             <div className="modal-footer">
-              <button
-                className="btn btn-primary"
-                data-bs-dismiss="modal"
-                onClick={handleUpdate}
-              >
+              <button className="btn btn-primary" onClick={handleUpdate}>
                 Update
               </button>
             </div>
