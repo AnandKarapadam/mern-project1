@@ -12,6 +12,8 @@ import { useDispatch } from "react-redux";
 import { getUserProfile } from "./redux/userSlice";
 import { isTokenValid } from "./utils/tokenUtils";
 import { useNavigate } from "react-router-dom";
+import PublicAdminRoute from "./routes/PublicAdminRoute";
+
 function App() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -61,7 +63,9 @@ function App() {
             </ProtectedUserRoute>
           }
         />
-        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/admin/login" element={<PublicAdminRoute>
+          <AdminLogin />
+        </PublicAdminRoute>} />
         <Route path="/admin/dashboard" element={
           <ProtectedAdminRoute>
             <AdminDashboard />

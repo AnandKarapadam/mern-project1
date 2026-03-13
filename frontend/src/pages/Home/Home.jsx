@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { logout } from "../../redux/userSlice";
 import "./Home.css";
 import "bootstrap/dist/css/bootstrap.min.css";
-
+import Swal from 'sweetalert2';
 
 function Home() {
   const navigate = useNavigate();
@@ -12,9 +12,30 @@ function Home() {
 
   const user = useSelector((state) => state.users.user);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    const result = await Swal.fire({
+    title: "Are you sure?",
+    text: "You will be logged out of your account.",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#d33",
+    cancelButtonColor: "#3085d6",
+    confirmButtonText: "Yes, logout"
+  });
+
+  if (result.isConfirmed) {
+
     dispatch(logout());
+
+    Swal.fire({
+      icon: "success",
+      title: "Logged Out",
+      timer: 1200,
+      showConfirmButton: false
+    });
+
     navigate("/login");
+  }
   };
 
   return (

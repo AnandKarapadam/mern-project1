@@ -100,17 +100,20 @@ const userSlice = createSlice({
       state.user = null;
       state.token = null;
       localStorage.removeItem("token");
+      state.error = null;
     },
   },
   extraReducers: (builder) => {
     builder
       .addCase(registerUser.pending, (state) => {
         state.loading = true;
+        state.error = null;
       })
       .addCase(registerUser.fulfilled, (state, action) => {
         state.loading = false;
         state.user = action.payload.user;
         state.token = action.payload.token;
+        state.error = null;
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.loading = false;
